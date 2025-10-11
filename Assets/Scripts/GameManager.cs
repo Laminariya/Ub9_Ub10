@@ -17,6 +17,10 @@ public class GameManager : MonoBehaviour
     public const string Korpus4 = "Indigo  4 Ub9";
     public const string Korpus5 = "Indigo  5 Ub9";
     public const string Korpus6 = "Indigo  6 Ub9";
+    public const string Korpus1_10 = "1 Ub10";
+    public const string Korpus2_10 = "2 Ub10";
+    public const string Korpus3_10 = "3 Ub10";
+    public const string Korpus5_10 = "5 Ub10";
     
     [HideInInspector] public List<string> KorpusName = new List<string>();
     
@@ -72,6 +76,10 @@ public class GameManager : MonoBehaviour
         KorpusName.Add(Korpus4);
         KorpusName.Add(Korpus5);
         KorpusName.Add(Korpus6);
+        KorpusName.Add(Korpus1_10);
+        KorpusName.Add(Korpus2_10);
+        KorpusName.Add(Korpus3_10);
+        KorpusName.Add(Korpus5_10);
         
         StartCor();
     }
@@ -79,8 +87,8 @@ public class GameManager : MonoBehaviour
     private async Task StartCor()
     {
         //Грузим джейсон с сервака
-        
-        await _loadJsonClass.PostZapros(); //Должны получить стрингу
+        _serializeJson.LoadJsonFile();
+        //await _loadJsonClass.PostZapros(); //Должны получить стрингу
         //Делаем класс джесона
         if (JsonText != "")
             Json = JsonUtility.FromJson<JsonClass>(JsonText);
@@ -128,12 +136,23 @@ public class GameManager : MonoBehaviour
         
         ClosePanels();
 
-        //yield return StartCoroutine(LoadAllPlane());
+        //StartCoroutine(LoadAllPlane());
         //yield return StartCoroutine(ResizeImage());
         //Проверяем изменился ли джейсон
         //Если изменился, то меняем его и начинаем проверять есть ли новые схемы и загружаем их.
-        
+
+        foreach (var mySection in MySections)
+        {
+            Debug.Log(mySection.Number + " " + mySection.NumberUB + " " + mySection.Section.realtyObjects.Length);
+            if (mySection.NumberUB == 10)
+            {
+                Debug.Log(mySection.Section.realtyObjects[0].price);
+            }
+        }
+
     }
+    
+    
 
     private void CheckNewPlans()
     {
@@ -192,20 +211,52 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator LoadAllPlane()
+    IEnumerator LoadAllPlane() //Загрузка всех схем к себе на диск
     {
-        foreach (var building in Json.buildings)
-        {
+        // foreach (var building in Json.buildings)
+        // {
+        //     int count = 0;
+        //     foreach (var section in building.sections)
+        //     {
+        //         count += section.realtyObjects.Length;
+        //     }
+        //     Debug.Log("All " + count);
+        //     foreach (var section in building.sections)
+        //     {
+        //         Debug.Log("Start Section " + section.realtyObjects.Length);
+        //         foreach (var realtyObject in section.realtyObjects)
+        //         {
+        //             foreach (var layoutUrl in realtyObject.layoutUrls)
+        //             {
+        //                 if (layoutUrl.layoutName == "LayoutForTheContract")
+        //                 {
+        //                     yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
+        //                         _domen + layoutUrl.siteLink,
+        //                         Directory.GetCurrentDirectory() + _planeFloor + realtyObject.realtyobjectId));
+        //                 }
+        //                 
+        //                 if (layoutUrl.layoutName == "FunctionalLayout")
+        //                 {
+        //                     yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
+        //                         _domen + layoutUrl.siteLink,
+        //                         Directory.GetCurrentDirectory() + _planeRoom + realtyObject.realtyobjectId));
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } 
+        
             int count = 0;
-            foreach (var section in building.sections)
+            foreach (var section in MySections)
             {
-                count += section.realtyObjects.Length;
+                count += section.Section.realtyObjects.Length;
             }
             Debug.Log("All " + count);
-            foreach (var section in building.sections)
+            foreach (var section in MySections)
             {
-                Debug.Log("Start Section " + section.realtyObjects.Length);
-                foreach (var realtyObject in section.realtyObjects)
+                if(section.NumberUB==9) continue;
+                Debug.Log("Start Section " + section.Section.realtyObjects.Length);
+                foreach (var realtyObject in section.Section.realtyObjects)
                 {
                     foreach (var layoutUrl in realtyObject.layoutUrls)
                     {
@@ -225,7 +276,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
-        } 
+        
     }
 
     private void CreateListRooms()
@@ -275,7 +326,7 @@ public class GameManager : MonoBehaviour
             if(!isTrueName) continue;
             foreach (var section in building.sections)
             {
-                MySection mySection = new MySection(section, GetEndData(building.deadline));
+                MySection mySection = new MySection(section, GetEndData(building.deadline), building.name);
                 MySections.Add(mySection);
             }
             //Debug.Log(building.name);
@@ -455,19 +506,20 @@ public class ListRooms
         PloshadMin = 10000000f;
         foreach (var room in Rooms)
         {
-            if(room.amount==0) Debug.Log(room.buildingId + " "  + room.number + " " + room.name + " " + room.direction);
+            //if(room.amount==0) Debug.Log(room.buildingId + " "  + room.number + " " + room.name + " " + room.direction);
             if (PriceMin > room.amount) PriceMin = room.amount;
             if (PriceMax < room.amount) PriceMax = room.amount;
             if (PloshadMin > room.area) PloshadMin = room.area;
             if (PloshadMax < room.area) PloshadMax = room.area;
         }
-        Debug.Log((int)PriceMin + " " + (int)PriceMax + "//" + PloshadMin + " " + PloshadMax);
+        //Debug.Log((int)PriceMin + " " + (int)PriceMax + "//" + PloshadMin + " " + PloshadMax);
     }
 }
 
 [Serializable]
 public class MySection
 {
+    public int NumberUB;
     public Section Section;
     public Dictionary<int, List<MyApartment>> ApartmentDictionary = new Dictionary<int, List<MyApartment>>();
     public Dictionary<int, float> MinPrice = new Dictionary<int, float>();
@@ -480,7 +532,7 @@ public class MySection
 
     private List<int> _countRoomQuantity = new List<int>();
 
-    public MySection(Section section, string endData)
+    public MySection(Section section, string endData, string buildingName)
     {
         Section = section;
         
@@ -517,6 +569,7 @@ public class MySection
         }
         
         Number = GetNumberKorpus(Section.name);
+        NumberUB = GetNumberUB(buildingName);
         EndData = endData;
     }
 
@@ -572,7 +625,25 @@ public class MySection
     private string GetNumberKorpus(string nameKorpus)
     {
         string[] strings = nameKorpus.Split("-");
-        return strings[strings.Length-1];
+        // Debug.Log("Number: " + strings[strings.Length - 1]);
+        // string[] split2 = strings[strings.Length - 1].Split(".");
+        // foreach (var s in split2)
+        // {
+        //     Debug.Log("Split: "+s);
+        // }
+        // if(split2.Length>1) return strings[split2.Length-1];
+        // else
+        // {
+        //   return strings[strings.Length-1];  
+        // }
+        return strings[strings.Length-1][strings[strings.Length-1].Length-1].ToString();
+    }
+
+    private int GetNumberUB(string nameUb)
+    {
+        string[] split = nameUb.Split(" ");
+        if (split[split.Length - 1] == "Ub9") return 9;
+        else return 10;
     }
 
 }

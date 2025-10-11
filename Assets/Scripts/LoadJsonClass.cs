@@ -205,7 +205,7 @@ public class LoadJsonClass : MonoBehaviour
 
     private async Task WriteJson(string text)
     {
-        string path = "C://Projects//PlanerRooms//Assets//note1.txt";
+        string path = Directory.GetCurrentDirectory() + "\\note1.txt"; //"C://Projects//PlanerRooms//Assets
 
         // полная перезапись файла 
         using (StreamWriter writer = new StreamWriter(path, false))
