@@ -146,7 +146,11 @@ public class GameManager : MonoBehaviour
             Debug.Log(mySection.Number + " " + mySection.NumberUB + " " + mySection.Section.realtyObjects.Length);
             if (mySection.NumberUB == 10)
             {
-                Debug.Log(mySection.Section.realtyObjects[0].price);
+                foreach (var realtyObject in mySection.Section.realtyObjects)
+                {
+                    Debug.Log(realtyObject.amount);
+                }
+               
             }
         }
 

@@ -19,6 +19,7 @@ public class SerializeJSON : MonoBehaviour
         if (_json != "")
         {
             GetComponent<GameManager>().Json = JsonUtility.FromJson<JsonClass>(_json);
+            GetComponent<GameManager>().JsonText = _json;
         }
         Debug.Log("Json загружен");
     }
