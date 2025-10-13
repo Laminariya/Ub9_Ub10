@@ -58,6 +58,20 @@ public class SendMessageToServer : MonoBehaviour
     public void OnFloor(RealtyObject realtyObject) //HH03SSXX01RRGGBB\r\n Включить бледным свечением этаж
     {
         //HH03SSXX01080000
+        
+        string str = realtyObject.sectionNumber.ToString("X");
+        if(str.Length==1) str = "0" + str;
+        str += "03";
+        string f = realtyObject.floor.ToString("X");
+        if (f.Length == 1) f = "0" + f;
+        str += f;
+        string s = 1.ToString("X");
+        if (s.Length == 1) s = "0" + s;
+        str += s + "03000000";
+        Debug.Log("Mess Floor: "+ realtyObject.sectionNumber + " // " + realtyObject.floor);
+        _manager.UdpClient.AddMessage(str, "Floor: " + realtyObject.sectionNumber + " // " + realtyObject.floor);
+        return;
+        
         string message = GetHexXX(realtyObject.sectionNumber);
         message += "03";
         message += GetHexXX(realtyObject.floor);
@@ -65,18 +79,22 @@ public class SendMessageToServer : MonoBehaviour
         _manager.UdpClient.AddMessage(message, "OnFloor " + realtyObject.floor);
     }
 
-    public void OffFloor(RealtyObject realtyObject) //HH03SSXX00000000\r\n HH - номер дома, SS - Этаж, XX - секция
-    {
-        string message = GetHexXX(realtyObject.sectionNumber);
-        message += "03";
-        message += GetHexXX(realtyObject.floor);
-        message += "0100000000";
-        _manager.UdpClient.AddMessage(message, "OffFloor " + realtyObject.floor);
-    }
-
     public void OnRoom(RealtyObject realtyObject) //HH01FFFF03000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
     {
         //HH01FFFF03000000
+        string str = realtyObject.sectionNumber.ToString("X");
+        if(str.Length==1) str = "0" + str;
+        str += "01";
+        string f = realtyObject.number.ToString("X");
+        if (f.Length == 1) f = "000" + f;
+        else if (f.Length == 2) f = "00" + f;
+        else if (f.Length == 3) f = "0" + f;
+        f += "03000000";
+        str += f;
+        Debug.Log("Mess Flat: "+ realtyObject.sectionNumber + " // " + realtyObject.number);
+        _manager.UdpClient.AddMessage(str, "Flat: " + realtyObject.sectionNumber + " // " + realtyObject.number);
+        return;
+        
         string message = GetHexXX(realtyObject.sectionNumber);
         message += "01";
         message += GetHexXXHH(realtyObject.number);
@@ -84,15 +102,7 @@ public class SendMessageToServer : MonoBehaviour
         _manager.UdpClient.AddMessage(message, "OnRoom " + realtyObject.number);
     }
 
-    public void OffRoom(RealtyObject realtyObject)
-    {
-        //HH01FFFF00000000
-        string message = GetHexXX(realtyObject.sectionNumber);
-        message += "01";
-        message += GetHexXXHH(realtyObject.number);
-        message += "00000000";
-        _manager.UdpClient.AddMessage(message, "OffRoom " + realtyObject.number);
-    }
+  
     
     public void OnSection(string number) //HH02010300000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
     {
@@ -100,14 +110,7 @@ public class SendMessageToServer : MonoBehaviour
         message += "02010300000000";
         _manager.UdpClient.AddMessage(message, "OnSection " + number);
     }
-    
-    public void OffSection(string number) //HH02010000000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
-    {
-        string message = "0"+ number;
-        message += "02010000000000";
-        _manager.UdpClient.AddMessage(message, "OffSection " + number);
-    }
-    
+
     public void OffAll() //007F060100000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
     {
         _manager.UdpClient.ClearQueue();
@@ -138,6 +141,7 @@ public class SendMessageToServer : MonoBehaviour
 
     private string GetHexXXHH(int value)
     {
+        Debug.Log("XXX " + value);
         string number = value.ToString();
         if (number.Length > 5)
         {
@@ -240,6 +244,67 @@ public class SendMessageToServer : MonoBehaviour
             }
         }
         return "0";
+    }
+    
+    public void MessageOnHouse(int house, int porch, bool isOn = true)
+    {
+        //Debug.Log(house+" " + porch);
+        //HH02PP0300000000
+        string str = house.ToString("X");
+        if(str.Length==1) str = "0" + str;
+        str += "02";
+        string por = porch.ToString("X");
+        if(por.Length==1) por = "0" + por;
+        str += por;
+        if (isOn) str += "0300000000";
+        else str += "0000000000";
+        Debug.Log("Mess House");
+        _manager.UdpClient.AddMessage(str, "House " + house + " // " + porch);
+    }
+
+    public void MessageOnFlat(int house, int porch, int flat, bool isOn = true)
+    {
+        //HH01FFFF03000000
+        string str = house.ToString("X");
+        if(str.Length==1) str = "0" + str;
+        str += "01";
+        string f = flat.ToString("X");
+        if (f.Length == 1) f = "000" + f;
+        else if (f.Length == 2) f = "00" + f;
+        else if (f.Length == 3) f = "0" + f;
+        if (isOn) f += "03000000";
+        else f += "00000000";
+        str += f;
+        Debug.Log("Mess Flat");
+        _manager.UdpClient.AddMessage(str, "Flat: " + house + " // " + porch + " // " + flat);
+    }
+
+    public void MessageOnFloor(int house, int porch, int floor)
+    {
+        //HH03SSXX03000000
+        string str = house.ToString("X");
+        if(str.Length==1) str = "0" + str;
+        str += "03";
+        string f = floor.ToString("X");
+        if (f.Length == 1) f = "0" + f;
+        str += f;
+        string s = porch.ToString("X");
+        if (s.Length == 1) s = "0" + s;
+        str += s + "03000000";
+        Debug.Log("Mess Floor");
+        _manager.UdpClient.AddMessage(str, "Floor: " + house + " // " + porch + " // " + floor);
+    }
+
+    public void MessageOffAllLight()
+    {
+        Debug.Log("Mess OffAll");
+        _manager.UdpClient.AddMessage("007F060100000000", "OffAllLight"); //Погасить всё!!!
+    }
+
+    public void MessageOnDemo()
+    {
+        Debug.Log("Mess Demo");
+        _manager.UdpClient.AddMessage("0064010000000000", "OnDemo");  //Включить демо!
     }
 
 }

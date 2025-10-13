@@ -60,6 +60,9 @@ public class GameManager : MonoBehaviour
     public List<RealtyObject> RealtyObjectsFree = new List<RealtyObject>();
     public List<RealtyObject> RealtyObjectsSold = new List<RealtyObject>();
 
+    public GameObject Canvas9;
+    public GameObject Canvas10;
+
     void Start()
     {
         b_Home.onClick.AddListener(OpenHome);
@@ -125,16 +128,16 @@ public class GameManager : MonoBehaviour
         Debug.Log("444");
         
         
-        SendMessageToServer.Init(this);
-        UdpClient.Init(this);
+        SendMessageToServer.Init(this);//Один
+        UdpClient.Init(this);          //Один
         ParametrsRoom.Init(this);
         Komplex.Init(this);
         HomePage.Init(this);
-        CreateImagePng.Init(this);
+        CreateImagePng.Init(this);     //Один
         SearchRoomClass.Init(this);
-        InputIpPanel.Init(this);
+        InputIpPanel.Init(this);       //Один
         
-        ClosePanels();
+        OpenChoseComplex();
 
         //StartCoroutine(LoadAllPlane());
         //yield return StartCoroutine(ResizeImage());
@@ -143,12 +146,12 @@ public class GameManager : MonoBehaviour
 
         foreach (var mySection in MySections)
         {
-            Debug.Log(mySection.Number + " " + mySection.NumberUB + " " + mySection.Section.realtyObjects.Length);
+            Debug.Log(mySection.NumberUB + " " + mySection.Number + " " + mySection.Section.realtyObjects.Length);
             if (mySection.NumberUB == 10)
             {
                 foreach (var realtyObject in mySection.Section.realtyObjects)
                 {
-                    Debug.Log(realtyObject.amount);
+                    //Debug.Log(realtyObject.amount);
                 }
                
             }
@@ -175,6 +178,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void OpenChoseComplex()
+    {
+        ClosePanelsUb10();
+        ClosePanelsUb9();
+        Canvas9.SetActive(false);
+        Canvas10.SetActive(false);
+    }
+
     private void OpenHome()
     {
         HomePage.Open();
@@ -190,11 +201,30 @@ public class GameManager : MonoBehaviour
         ParametrsRoom.Open();
     }
 
-    private void ClosePanels()
+    private void ClosePanelsUb9()
     {
         HomePage.Close();
         Komplex.Close();
         ParametrsRoom.Close();
+    }
+    
+    private void ClosePanelsUb10()
+    {
+        // HomePage.Close();
+        // Komplex.Close();
+        // ParametrsRoom.Close();
+    }
+
+    public void OpenUb9()
+    {
+        ClosePanelsUb9();
+        Canvas9.SetActive(true);
+    }
+
+    public void OpenUb10()
+    {
+        ClosePanelsUb10();
+        Canvas10.SetActive(true);
     }
 
     IEnumerator ResizeImage()
@@ -217,70 +247,37 @@ public class GameManager : MonoBehaviour
 
     IEnumerator LoadAllPlane() //Загрузка всех схем к себе на диск
     {
-        // foreach (var building in Json.buildings)
-        // {
-        //     int count = 0;
-        //     foreach (var section in building.sections)
-        //     {
-        //         count += section.realtyObjects.Length;
-        //     }
-        //     Debug.Log("All " + count);
-        //     foreach (var section in building.sections)
-        //     {
-        //         Debug.Log("Start Section " + section.realtyObjects.Length);
-        //         foreach (var realtyObject in section.realtyObjects)
-        //         {
-        //             foreach (var layoutUrl in realtyObject.layoutUrls)
-        //             {
-        //                 if (layoutUrl.layoutName == "LayoutForTheContract")
-        //                 {
-        //                     yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
-        //                         _domen + layoutUrl.siteLink,
-        //                         Directory.GetCurrentDirectory() + _planeFloor + realtyObject.realtyobjectId));
-        //                 }
-        //                 
-        //                 if (layoutUrl.layoutName == "FunctionalLayout")
-        //                 {
-        //                     yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
-        //                         _domen + layoutUrl.siteLink,
-        //                         Directory.GetCurrentDirectory() + _planeRoom + realtyObject.realtyobjectId));
-        //                 }
-        //             }
-        //         }
-        //     }
-        // } 
-        
-            int count = 0;
-            foreach (var section in MySections)
+        int count = 0;
+        foreach (var section in MySections)
+        {
+            count += section.Section.realtyObjects.Length;
+        }
+
+        Debug.Log("All " + count);
+        foreach (var section in MySections)
+        {
+            if (section.NumberUB == 9) continue;
+            Debug.Log("Start Section " + section.Section.realtyObjects.Length);
+            foreach (var realtyObject in section.Section.realtyObjects)
             {
-                count += section.Section.realtyObjects.Length;
-            }
-            Debug.Log("All " + count);
-            foreach (var section in MySections)
-            {
-                if(section.NumberUB==9) continue;
-                Debug.Log("Start Section " + section.Section.realtyObjects.Length);
-                foreach (var realtyObject in section.Section.realtyObjects)
+                foreach (var layoutUrl in realtyObject.layoutUrls)
                 {
-                    foreach (var layoutUrl in realtyObject.layoutUrls)
+                    if (layoutUrl.layoutName == "LayoutForTheContract")
                     {
-                        if (layoutUrl.layoutName == "LayoutForTheContract")
-                        {
-                            yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
-                                _domen + layoutUrl.siteLink,
-                                Directory.GetCurrentDirectory() + _planeFloor + realtyObject.realtyobjectId));
-                        }
-                        
-                        if (layoutUrl.layoutName == "FunctionalLayout")
-                        {
-                            yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
-                                _domen + layoutUrl.siteLink,
-                                Directory.GetCurrentDirectory() + _planeRoom + realtyObject.realtyobjectId));
-                        }
+                        yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
+                            _domen + layoutUrl.siteLink,
+                            Directory.GetCurrentDirectory() + _planeFloor + realtyObject.realtyobjectId));
+                    }
+
+                    if (layoutUrl.layoutName == "FunctionalLayout")
+                    {
+                        yield return StartCoroutine(CreateImagePng.LoadFileFromUrl(
+                            _domen + layoutUrl.siteLink,
+                            Directory.GetCurrentDirectory() + _planeRoom + realtyObject.realtyobjectId));
                     }
                 }
             }
-        
+        }
     }
 
     private void CreateListRooms()
@@ -454,6 +451,7 @@ public class GameManager : MonoBehaviour
     
     public string GetSplitPrice(string str)
     {
+        if (str.Length < 5) return "0";
         string price = str.Insert(str.Length-3, " ");
         price = price.Insert(price.Length - 7, " ");
         price += " <sprite index=0>";
@@ -583,7 +581,7 @@ public class MySection
 
         foreach (var apartment in ApartmentDictionary[roomQuantity])
         {
-            if(apartment.Price<=1) Debug.Log(apartment.Price+ " " + apartment.RealtyObject.direction);
+            //if(apartment.Price<=1) Debug.Log(apartment.Price+ " " + apartment.RealtyObject.direction);
             if (apartment.Price < minPrice) minPrice = apartment.Price;
         }
         //Debug.Log("XX "+ minPrice);

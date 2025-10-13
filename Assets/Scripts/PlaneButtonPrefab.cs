@@ -46,6 +46,7 @@ public class PlaneButtonPrefab : MonoBehaviour
 
     private string GetSplitPrice(string str)
     {
+        if (str.Length < 5) return str;
         string price = str.Insert(str.Length-3, " ");
         price = price.Insert(price.Length - 7, " ");
         price += " <sprite index=0>";

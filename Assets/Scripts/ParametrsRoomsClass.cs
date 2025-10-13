@@ -331,10 +331,26 @@ public class ParametrsRoomsClass : MonoBehaviour
     private void ActiveListRoom(ListRooms listRooms)
     {
         _currentListRoom = listRooms;
-        PriceOt.text = ((int) listRooms.PriceMin).ToString().Substring(0, 2) + "," +
-                       ((int) listRooms.PriceMin).ToString().Substring(2, 1);
-        PriceDo.text = ((int) listRooms.PriceMax).ToString().Substring(0, 2) + "," +
-                       ((int) listRooms.PriceMax).ToString().Substring(2, 1);
+        if (((int) listRooms.PriceMin).ToString().Length > 3)
+        {
+            PriceOt.text = ((int) listRooms.PriceMin).ToString().Substring(0, 2) + "," +
+                           ((int) listRooms.PriceMin).ToString().Substring(2, 1);
+        }
+        else
+        {
+            PriceOt.text = "0";
+        }
+
+        if (((int) listRooms.PriceMax).ToString().Length > 3)
+        {
+            PriceDo.text = ((int) listRooms.PriceMax).ToString().Substring(0, 2) + "," +
+                           ((int) listRooms.PriceMax).ToString().Substring(2, 1);
+        }
+        else
+        {
+            PriceDo.text = "0";
+        }
+
         PloshadOt.text = listRooms.PloshadMin.ToString();
         PloshadDo.text = listRooms.PloshadMax.ToString();
         PriceSlider.Init();
@@ -351,10 +367,27 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         _minPrice = _currentListRoom.PriceMin + PriceSlider.LeftSlider.value * _deltaPrice;
         _maxPrice= _currentListRoom.PriceMax - (1 - PriceSlider.RightSlider.value) * _deltaPrice;
-        PriceOt.text = ((int) _minPrice).ToString().Substring(0, 2) + "," +
-                       ((int) _minPrice).ToString().Substring(2, 1);
-        PriceDo.text = ((int) _maxPrice).ToString().Substring(0, 2) + "," +
-                       ((int) _maxPrice).ToString().Substring(2, 1);
+        if (((int) _minPrice).ToString().Length > 3)
+        {
+            PriceOt.text = ((int) _minPrice).ToString().Substring(0, 2) + "," +
+                           ((int) _minPrice).ToString().Substring(2, 1);
+        }
+        else
+        {
+            PriceOt.text = "0";
+        }
+
+        if (((int) _maxPrice).ToString().Length > 3)
+        {
+            PriceDo.text = ((int) _maxPrice).ToString().Substring(0, 2) + "," +
+                           ((int) _maxPrice).ToString().Substring(2, 1);
+        }
+        else
+        {
+            PriceDo.text = "0";
+        }
+
+        
     }
 
     private void OnValueChangeArea()

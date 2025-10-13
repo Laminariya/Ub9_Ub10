@@ -359,8 +359,8 @@ public class HomeClass : MonoBehaviour
         
         _currentSection = section;
         
-        Debug.Log(_currentSection.MinPrice[0] + " " + _currentSection.MinPrice[1] + " " + _currentSection.MinPrice[2] +
-                  " " + _currentSection.MinPrice[3] + " " + _currentSection.MinPrice[4]);
+        //Debug.Log(_currentSection.MinPrice[0] + " " + _currentSection.MinPrice[1] + " " + _currentSection.MinPrice[2] +
+         //         " " + _currentSection.MinPrice[3] + " " + _currentSection.MinPrice[4]);
         
         _currentRender = render;
         PopapKorpus.SetActive(true); //Показываем попап
