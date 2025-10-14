@@ -18,9 +18,9 @@ public class KomplexClass : MonoBehaviour
     private Image _imageGalereya;
     private List<Sprite> _sprites = new List<Sprite>();
     private int _numberSprite = 0;
-    private GameManager _gameManager;
+    private UbManager _gameManager;
 
-    public void Init(GameManager manager)
+    public void Init(UbManager manager)
     {
         _gameManager = manager;
         GalereyaPanel.SetActive(false);

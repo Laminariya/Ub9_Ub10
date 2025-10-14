@@ -63,6 +63,7 @@
     <Compile Include="Assets\Scripts\MyUdpClient.cs" />
     <Compile Include="Assets\Scripts\HomePanel\HP_PopapLight.cs" />
     <Compile Include="Assets\Scripts\ButtonFloorPrefab.cs" />
+    <Compile Include="Assets\Scripts\UbManager.cs" />
     <Compile Include="Assets\Scripts\SerializeJSON.cs" />
     <Compile Include="Assets\Scripts\HomePanel\HP_VideoPanel.cs" />
     <Compile Include="Assets\Scripts\LoadJsonClass.cs" />

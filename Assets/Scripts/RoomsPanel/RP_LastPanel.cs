@@ -25,12 +25,12 @@ public class RP_LastPanel : MonoBehaviour
     
     private Sprite roomSprite;
     private Sprite floorSprite;
-    private GameManager _manager;
+    private UbManager _manager;
     private RealtyObject _currentRealtyObject;
     private Coroutine _coroutineLight;
     private bool _isOffAll;
 
-    public void Init(GameManager manager)
+    public void Init(UbManager manager)
     {
         _manager = manager;
         B_Planer.onClick.AddListener(OnPlaner);
@@ -49,7 +49,7 @@ public class RP_LastPanel : MonoBehaviour
     private void Close()
     {
         gameObject.SetActive(false);
-        _manager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OffAll();
     }
 
     public void OnOpenLastPanel(RealtyObject realtyObject)
@@ -60,8 +60,8 @@ public class RP_LastPanel : MonoBehaviour
         floorSprite = Resources.Load<Sprite>("PlansFloor/" + realtyObject.realtyobjectId);
         OnPlaner();
         NameRoom.text = realtyObject.GetTypeRoom() + ", " + realtyObject.area + " <sprite index=1>";
-        Price.text = _manager.GetSplitPrice(realtyObject.amount.ToString()) + " <sprite index=0>";
-        Korpus.text = _manager.GetMarketingName(realtyObject.buildingId);
+        Price.text = _manager.gameManager.GetSplitPrice(realtyObject.amount.ToString()) + " <sprite index=0>";
+        Korpus.text = _manager.gameManager.GetMarketingName(realtyObject.buildingId);
         Otdelka.text = realtyObject.decorationName;
         NumberFloor.text = realtyObject.floor.ToString();
         RoomNumber.text = "№" + realtyObject.number;
@@ -75,17 +75,17 @@ public class RP_LastPanel : MonoBehaviour
 
     private void OnLight(RealtyObject realtyObject)
     {
-        _manager.UdpClient.ClearQueue();
-        _manager.SendMessageToServer.OffAll();
-        _manager.SendMessageToServer.StartRoomOnFloor(realtyObject);
+        _manager.gameManager.UdpClient.ClearQueue();
+        _manager.gameManager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.StartRoomOnFloor(realtyObject);
     }
 
     private void OnBackLastPanel()
     {
         gameObject.SetActive(false);
-        _manager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OffAll();
         if(_currentRealtyObject!=null && !_isOffAll)
-            _manager.SendMessageToServer.OnFloor(_currentRealtyObject);
+            _manager.gameManager.SendMessageToServer.OnFloor(_currentRealtyObject);
     }
 
     private void OnPlaner()

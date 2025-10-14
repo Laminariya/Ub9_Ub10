@@ -13,17 +13,17 @@ public class PlaneButtonPrefab : MonoBehaviour
     public Image Plane;
 
     [HideInInspector] public RealtyObject RealtyObject;
-    private GameManager _manager;
+    private UbManager _manager;
     private ParametrsRoomsClass _parametrsRoomsClass;
 
-    public void Init(RealtyObject realtyObject, string endData, GameManager manager, ParametrsRoomsClass parametrsRoomsClass)
+    public void Init(RealtyObject realtyObject, string endData, UbManager manager, ParametrsRoomsClass parametrsRoomsClass)
     {
         _parametrsRoomsClass = parametrsRoomsClass;
         _manager = manager;
         RealtyObject = realtyObject;
         B_Click.onClick.AddListener(() => _parametrsRoomsClass.LastPanelClass.OnOpenLastPanel(RealtyObject));
         B_Click.onClick.AddListener(_parametrsRoomsClass.StopLoadPlans);
-        EndDate.text = _manager.GetEndData(endData);
+        EndDate.text = _manager.gameManager.GetEndData(endData);
         NumberFloor.text = "|  " + realtyObject.floor + " этаж  |";
         PriceOneMeter.text = realtyObject.price + " <sprite index=2>";
         NameAppartment.text = realtyObject.GetTypeRoom() + ", " + realtyObject.area + " <sprite index=1>";

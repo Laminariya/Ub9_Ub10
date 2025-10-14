@@ -27,17 +27,11 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public JsonClass Json;
     [HideInInspector] public string JsonText;
     
-    public HomeClass HomePage;
-    public KomplexClass Komplex;
-    public ParametrsRoomsClass ParametrsRoom;
     public SearchRoomClass SearchRoomClass;
     public InputIpPanel InputIpPanel;
     public MyUdpClient UdpClient;
     public SendMessageToServer SendMessageToServer;
-
-    public Button b_Home;
-    public Button b_Komplex;
-    public Button b_Rooms;
+    
 //https://s3.mastertel.ru/crm-content/Main/projects/VR/buildings/VR-Ub9/realEstates/VR-1-1-%D0%9A-5-14-4-514175/fp/VR-1-1-%D0%9A-5-14-4-514175.PNG
     private string _domen = "https://s3.mastertel.ru/";
     private string _planeFloor = "//Planer//PlansFloor//";
@@ -47,27 +41,21 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public CreateImagePNG CreateImagePng;
     private SerializeJSON _serializeJson;
 
-    public Image TestImage;
-    public List<Sprite> _sprites = new List<Sprite>();
+    [HideInInspector] public ListRooms Studiya = new ListRooms();
+    [HideInInspector] public ListRooms One = new ListRooms();
+    [HideInInspector] public ListRooms Two = new ListRooms();
+    [HideInInspector] public ListRooms Three = new ListRooms();
+    [HideInInspector] public ListRooms Four = new ListRooms();
 
-    public ListRooms Studiya = new ListRooms();
-    public ListRooms One = new ListRooms();
-    public ListRooms Two = new ListRooms();
-    public ListRooms Three = new ListRooms();
-    public ListRooms Four = new ListRooms();
+    [HideInInspector] public List<MySection> MySections = new List<MySection>();
+    [HideInInspector] public List<RealtyObject> RealtyObjectsFree = new List<RealtyObject>();
+    [HideInInspector] public List<RealtyObject> RealtyObjectsSold = new List<RealtyObject>();
 
-    public List<MySection> MySections = new List<MySection>();
-    public List<RealtyObject> RealtyObjectsFree = new List<RealtyObject>();
-    public List<RealtyObject> RealtyObjectsSold = new List<RealtyObject>();
-
-    public GameObject Canvas9;
-    public GameObject Canvas10;
+    public UbManager UbManager9;
+    public UbManager UbManager10;
 
     void Start()
     {
-        b_Home.onClick.AddListener(OpenHome);
-        b_Komplex.onClick.AddListener(OpenKomplex);
-        b_Rooms.onClick.AddListener(OpenRooms);
         _loadJsonClass = GetComponent<LoadJsonClass>();
         _loadJsonClass.Init(this);
         CreateImagePng = GetComponent<CreateImagePNG>();
@@ -130,9 +118,8 @@ public class GameManager : MonoBehaviour
         
         SendMessageToServer.Init(this);//Один
         UdpClient.Init(this);          //Один
-        ParametrsRoom.Init(this);
-        Komplex.Init(this);
-        HomePage.Init(this);
+        UbManager10.Init(this);
+        UbManager9.Init(this);
         CreateImagePng.Init(this);     //Один
         SearchRoomClass.Init(this);
         InputIpPanel.Init(this);       //Один
@@ -146,17 +133,15 @@ public class GameManager : MonoBehaviour
 
         foreach (var mySection in MySections)
         {
-            Debug.Log(mySection.NumberUB + " " + mySection.Number + " " + mySection.Section.realtyObjects.Length);
+            //Debug.Log(mySection.NumberUB + " " + mySection.Number + " " + mySection.Section.realtyObjects.Length);
             if (mySection.NumberUB == 10)
             {
                 foreach (var realtyObject in mySection.Section.realtyObjects)
                 {
                     //Debug.Log(realtyObject.amount);
                 }
-               
             }
         }
-
     }
     
     
@@ -180,51 +165,18 @@ public class GameManager : MonoBehaviour
 
     public void OpenChoseComplex()
     {
-        ClosePanelsUb10();
-        ClosePanelsUb9();
-        Canvas9.SetActive(false);
-        Canvas10.SetActive(false);
-    }
-
-    private void OpenHome()
-    {
-        HomePage.Open();
-    }
-
-    private void OpenKomplex()
-    {
-        Komplex.Open();
-    }
-
-    private void OpenRooms()
-    {
-        ParametrsRoom.Open();
-    }
-
-    private void ClosePanelsUb9()
-    {
-        HomePage.Close();
-        Komplex.Close();
-        ParametrsRoom.Close();
+        UbManager9.Hide();
+        UbManager10.Hide();
     }
     
-    private void ClosePanelsUb10()
-    {
-        // HomePage.Close();
-        // Komplex.Close();
-        // ParametrsRoom.Close();
-    }
-
     public void OpenUb9()
     {
-        ClosePanelsUb9();
-        Canvas9.SetActive(true);
+        UbManager9.Show();
     }
 
     public void OpenUb10()
     {
-        ClosePanelsUb10();
-        Canvas10.SetActive(true);
+        UbManager10.Show();
     }
 
     IEnumerator ResizeImage()
@@ -447,6 +399,21 @@ public class GameManager : MonoBehaviour
         }
 
         return null;
+    }
+    
+    public int GetUbName(string buildingId)
+    {
+        foreach (var building in Json.buildings)    
+        {
+            if (building.buildingId == buildingId)
+            {
+                string[] split = building.name.Split(" ");
+                if (split[split.Length - 1] == "Ub9") return 9;
+                else return 10;
+            }
+        }
+
+        return 9;
     }
     
     public string GetSplitPrice(string str)

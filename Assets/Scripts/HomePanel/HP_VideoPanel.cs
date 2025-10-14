@@ -35,11 +35,11 @@ public class HP_VideoPanel : MonoBehaviour
     public RawImage RawImage3;
     public Image ScrollBar3;
     
-    private GameManager _manager;
+    private UbManager _manager;
     private Image _currentImage;
     private VideoPlayer _currentVideoPlayer;
     
-    public void Init(GameManager manager)
+    public void Init(UbManager manager)
     {
         _manager = manager;
         b_Video1.onClick.AddListener(OnVideo1);

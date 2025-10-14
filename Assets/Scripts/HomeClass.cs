@@ -111,7 +111,7 @@ public class HomeClass : MonoBehaviour
     [Header("LastPanel")] 
     public RP_LastPanel LastPanel;
     
-    private GameManager _manager;
+    private UbManager _manager;
     private MySection _currentSection;
     private Sprite _currentRender;
     private int[] _mass = new int[100]; //Этажи считаем от 1 элеманта, 
@@ -122,7 +122,7 @@ public class HomeClass : MonoBehaviour
     private List<RealtyObject> _realtyObjects = new List<RealtyObject>();
     private RealtyObject _room_CurrentRealityObject;
 
-    public void Init(GameManager manager)
+    public void Init(UbManager manager)
     {
         _manager = manager;
         b_BackMenu.onClick.AddListener(OnBackMenu);
@@ -157,7 +157,7 @@ public class HomeClass : MonoBehaviour
         b_Korpus4.gameObject.SetActive(false);
         b_Korpus5.gameObject.SetActive(false);
         b_Korpus6.gameObject.SetActive(false);
-        foreach (var section in _manager.MySections)
+        foreach (var section in _manager.gameManager.MySections)
         {
             string[] split = section.Section.name.Split("-");
             switch (split[split.Length-1])
@@ -253,14 +253,14 @@ public class HomeClass : MonoBehaviour
         {
             b_LightDvor.image.sprite = LightDvor_Active;
             //TODO отправляем команду зажечь двор
-            _manager.UdpClient.AddMessage("0180050A00000000", "OnDvor"); //Включить NN - канал
+            _manager.gameManager.UdpClient.AddMessage("0180050A00000000", "OnDvor"); //Включить NN - канал
             Debug.Log("Включили двор");
         }
         else
         {
             b_LightDvor.image.sprite = LightDvor_NotActive;
             //TODO отправляем команду выключить двор
-            _manager.UdpClient.AddMessage("0180051400000000", "OffDvor"); //Выключить NN - канал
+            _manager.gameManager.UdpClient.AddMessage("0180051400000000", "OffDvor"); //Выключить NN - канал
             Debug.Log("Выключили двор");
         }
     }
@@ -270,12 +270,12 @@ public class HomeClass : MonoBehaviour
         if (b_LightAll.image.sprite == LightAll_NotActive)
         {
             b_LightAll.image.sprite = LightAll_Active;
-            _manager.UdpClient.AddMessage("0064010000000000", "On Life"); //Лайф режим
+            _manager.gameManager.UdpClient.AddMessage("0064010000000000", "On Life"); //Лайф режим
         }
         else
         {
             b_LightAll.image.sprite = LightAll_NotActive;
-            _manager.SendMessageToServer.OffAll();
+            _manager.gameManager.SendMessageToServer.OffAll();
         }
     }
 
@@ -284,12 +284,12 @@ public class HomeClass : MonoBehaviour
         if (b_LightFitnes.image.sprite == LightFitnes_NotActive)
         {
             b_LightFitnes.image.sprite = LightFitnes_Active;
-            _manager.UdpClient.AddMessage("0102040300000000", "OnSection 7"); //Включить 7 корпус
+            _manager.gameManager.UdpClient.AddMessage("0102040300000000", "OnSection 7"); //Включить 7 корпус
         }
         else
         {
             b_LightFitnes.image.sprite = LightFitnes_NotActive;
-            _manager.UdpClient.AddMessage("0102040000000000", "OffSection 7"); //Включить 7 корпус
+            _manager.gameManager.UdpClient.AddMessage("0102040000000000", "OffSection 7"); //Включить 7 корпус
         }
     }
 
@@ -297,37 +297,37 @@ public class HomeClass : MonoBehaviour
     {
         if (b_LightAll.image.sprite == LightAll_NotActive)
         {
-            _manager.SendMessageToServer.OffAll();
+            _manager.gameManager.SendMessageToServer.OffAll();
         }
         else
         {
-            _manager.UdpClient.AddMessage("0064010000000000", "Life"); //Лайф режим
+            _manager.gameManager.UdpClient.AddMessage("0064010000000000", "Life"); //Лайф режим
         }
         if (b_LightFitnes.image.sprite == LightFitnes_NotActive)
         {
-            _manager.UdpClient.AddMessage("0102040000000000", "OffSection 7"); //Включить 7 корпус
+            _manager.gameManager.UdpClient.AddMessage("0102040000000000", "OffSection 7"); //Включить 7 корпус
         }
         else
         {
-            _manager.UdpClient.AddMessage("0102040300000000", "OnSection 7"); //Включить 7 корпус
+            _manager.gameManager.UdpClient.AddMessage("0102040300000000", "OnSection 7"); //Включить 7 корпус
         }
         if (b_LightDvor.image.sprite == LightDvor_NotActive)
         {
-            _manager.UdpClient.AddMessage("0180051400000000", "OffDvor"); //Выключить NN - канал
+            _manager.gameManager.UdpClient.AddMessage("0180051400000000", "OffDvor"); //Выключить NN - канал
         }
         else
         {
-            _manager.UdpClient.AddMessage("0180050A00000000", "OnDvor"); //Включить NN - канал
+            _manager.gameManager.UdpClient.AddMessage("0180050A00000000", "OnDvor"); //Включить NN - канал
         }
     }
 
     private void OnSoldApartments()
     {
         //TODO зажигаем проданные квартиры
-        _manager.SendMessageToServer.OffAll();
-        foreach (var realtyObject in _manager.RealtyObjectsSold)
+        _manager.gameManager.SendMessageToServer.OffAll();
+        foreach (var realtyObject in _manager.gameManager.RealtyObjectsSold)
         {
-            _manager.SendMessageToServer.OnRoom(realtyObject);
+            _manager.gameManager.SendMessageToServer.OnRoom(realtyObject);
         }
     }
 
@@ -469,7 +469,7 @@ public class HomeClass : MonoBehaviour
             }
         }
 
-        _manager.SendMessageToServer.OnSection(_currentSection.Number);
+        _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number);
         StartCoroutine(UpdateUI());
     }
 
@@ -498,7 +498,7 @@ public class HomeClass : MonoBehaviour
     {
         OnSelectKorpus();
         //_manager.SendMessageToServer.OnSection(_currentSection.Number);
-        _manager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OffAll();
         OnSaveLight();
     }
 
@@ -518,8 +518,8 @@ public class HomeClass : MonoBehaviour
         Room_NumberFloor.text = realtyObjects[0].floor+" этаж";
         Room_CountRoom.text = realtyObjects.Count+" квартир";
         
-        _manager.SendMessageToServer.OffAll();
-        _manager.SendMessageToServer.OnFloor(realtyObjects[0]);
+        _manager.gameManager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OnFloor(realtyObjects[0]);
         _room_CurrentRealityObject = realtyObjects[0];
         Room_ChangeRoom();
     }
@@ -536,7 +536,7 @@ public class HomeClass : MonoBehaviour
             Room_ImageHorizontal.SetNativeSize();
             Room_ImageVertical.gameObject.SetActive(false);
             Room_Button_ChoseRoom.transform.parent = Room_ImageHorizontal.transform;
-            Vector2 vector2 = _manager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
+            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
             vector2.x -= sprite.texture.width/2;
             vector2.y -= sprite.texture.height/2;
             float ws = 2470f / sprite.texture.width;
@@ -552,7 +552,7 @@ public class HomeClass : MonoBehaviour
             Room_ImageVertical.sprite = sprite;
             Room_ImageVertical.SetNativeSize();
             Room_Button_ChoseRoom.transform.parent = Room_ImageVertical.transform;
-            Vector2 vector2 = _manager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
+            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
             
             vector2.x -= sprite.texture.width/2;
             vector2.y -= sprite.texture.height/2;
@@ -577,9 +577,9 @@ public class HomeClass : MonoBehaviour
     private void Room_Back()
     {
         RoomPanel.SetActive(false);
-        _manager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OffAll();
         if(_room_CurrentRealityObject!=null)
-            _manager.SendMessageToServer.OnSection(_currentSection.Number);
+            _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number);
     }
 
     private void Room_GoToMenu()
@@ -608,7 +608,7 @@ public class HomeClass : MonoBehaviour
         Room_Popap.SetActive(true);
         Room_Dark.SetActive(true);
         
-        Room_Price.text = _manager.GetSplitPrice(_room_CurrentRoom.amount.ToString());
+        Room_Price.text = _manager.gameManager.GetSplitPrice(_room_CurrentRoom.amount.ToString());
         
         if(_room_CurrentRoom.roomQuantityName==0)
             Room_Area.text = "Студия, " + _room_CurrentRoom.area + " <sprite index=1>";
@@ -618,7 +618,7 @@ public class HomeClass : MonoBehaviour
                 _room_CurrentRoom.roomQuantityName + "-комнатная, " + _room_CurrentRoom.area + " <sprite index=1>";
         }
         
-        Room_EndData.text = _manager.GetMySection(_room_CurrentRoom.sectionId).EndData;
+        Room_EndData.text = _manager.gameManager.GetMySection(_room_CurrentRoom.sectionId).EndData;
     }
 
     private void Room_OnNext() //Переходим на последнюю страницу выбора квартир по параметрам
@@ -638,7 +638,7 @@ public class HomeClass : MonoBehaviour
     private void OnBackMenu()
     {
         gameObject.SetActive(false);
-        _manager.SendMessageToServer.OffAll();
+        _manager.gameManager.SendMessageToServer.OffAll();
     }
 
     private void OnChoseRoomParametrs()

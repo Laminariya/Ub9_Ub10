@@ -17,6 +17,8 @@ public class ParametrsRoomsClass : MonoBehaviour
         Four
     }
 
+    public int NumberUb;
+    
     public Button b_BackMenu;
     public Button b_Studio;
     public Button b_One;
@@ -50,7 +52,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     public RP_LastPanel LastPanelClass;
 
     private TypeRoom _typeRoom;
-    private GameManager _gameManager;
+    private UbManager _gameManager;
     private float _deltaPrice;
     private float _deltaPloshad;
     private ListRooms _currentListRoom;
@@ -63,7 +65,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     private Coroutine _loadCoroutine;
     private int _currentKorpus;
     
-    public void Init(GameManager manager)
+    public void Init(UbManager manager)
     {
         _gameManager = manager;
         b_BackMenu.onClick.AddListener(OnBackMenu);
@@ -104,7 +106,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         gameObject.SetActive(false);
         LastPanelClass.gameObject.SetActive(false);
-        _gameManager.SendMessageToServer.OffAll();
+        _gameManager.gameManager.SendMessageToServer.OffAll();
     }
 
     private void OnBackMenu()
@@ -118,7 +120,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         OnStudio();
         OnKorpus1();
-        _gameManager.SendMessageToServer.OffAll();
+        _gameManager.gameManager.SendMessageToServer.OffAll();
         for (int i = 0; i < _prefabs.Count; i++)
         {
             Destroy(_prefabs[i].gameObject);
@@ -143,7 +145,9 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         foreach (var room in _currentListRoom.Rooms)
         {
-            if(room.sectionNumber!=_currentKorpus) continue;
+            if (_gameManager.gameManager.GetUbName(room.buildingId) != NumberUb) continue;
+            Debug.Log(room.sectionNumber + " " + _currentKorpus);
+            if (room.sectionNumber != _currentKorpus) continue;
             if (room.amount > _minPrice - 1 && room.amount < _maxPrice + 1)
             {
                 if (room.area > _minPloshad - 0.1f && room.area < _maxPloshad + 0.1f)
@@ -151,7 +155,7 @@ public class ParametrsRoomsClass : MonoBehaviour
                     PlaneButtonPrefab obj = Instantiate(RoomPrefab, ContentParent).GetComponent<PlaneButtonPrefab>();
                     obj.Init(room, _currentListRoom.EndData, _gameManager, this);
                     _prefabs.Add(obj);
-                    _gameManager.SendMessageToServer.OnRoom(room);
+                    _gameManager.gameManager.SendMessageToServer.OnRoom(room);
                     //yield return new WaitForSeconds(0.1f);
                 }
             }
@@ -170,35 +174,35 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         _typeRoom = TypeRoom.Studio;
         ClickTypeRoom(b_Studio.image);
-        ActiveListRoom(_gameManager.Studiya);
+        ActiveListRoom(_gameManager.gameManager.Studiya);
     }
 
     private void OnOne()
     {
         _typeRoom = TypeRoom.One;
         ClickTypeRoom(b_One.image);
-        ActiveListRoom(_gameManager.One);
+        ActiveListRoom(_gameManager.gameManager.One);
     }
 
     private void OnTwo()
     {
         _typeRoom = TypeRoom.Two;
         ClickTypeRoom(b_Two.image);
-        ActiveListRoom(_gameManager.Two);
+        ActiveListRoom(_gameManager.gameManager.Two);
     }
 
     private void OnThree()
     {
         _typeRoom = TypeRoom.Three;
         ClickTypeRoom(b_Three.image);
-        ActiveListRoom(_gameManager.Three);
+        ActiveListRoom(_gameManager.gameManager.Three);
     }
 
     private void OnFour()
     {
         _typeRoom = TypeRoom.Four;
         ClickTypeRoom(b_Four.image);
-        ActiveListRoom(_gameManager.Four);
+        ActiveListRoom(_gameManager.gameManager.Four);
     }
 
     private void OnKorpus1()
