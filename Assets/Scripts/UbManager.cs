@@ -18,7 +18,7 @@ public class UbManager : MonoBehaviour
     
     public void Init(GameManager gameManager)
     {
-        Debug.Log("UbManager init");
+        //Debug.Log("UbManager init");
         this.gameManager = gameManager;
         HomePage = GetComponentInChildren<HomeClass>(true);
         Komplex = GetComponentInChildren<KomplexClass>(true);

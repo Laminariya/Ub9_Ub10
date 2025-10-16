@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
 
+    public bool IsLoadWeb;
+    
     public const string Korpus1 = "Indigo  1 Ub9";
     public const string Korpus2 = "Indigo  2 Ub9";
     public const string Korpus3 = "Indigo  3 Ub9";
@@ -48,11 +50,16 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public ListRooms Four = new ListRooms();
 
     [HideInInspector] public List<MySection> MySections = new List<MySection>();
-    [HideInInspector] public List<RealtyObject> RealtyObjectsFree = new List<RealtyObject>();
-    [HideInInspector] public List<RealtyObject> RealtyObjectsSold = new List<RealtyObject>();
+    [HideInInspector] public List<MyApartment> RealtyObjectsFree = new List<MyApartment>();
+    [HideInInspector] public List<MyApartment> RealtyObjectsSold = new List<MyApartment>();
 
     public UbManager UbManager9;
     public UbManager UbManager10;
+    
+    public List<int> Floors1 = new List<int>();
+    public List<int> Floors2 = new List<int>();
+    public List<int> Floors3 = new List<int>();
+    public List<int> Floors5 = new List<int>();
 
     void Start()
     {
@@ -78,8 +85,15 @@ public class GameManager : MonoBehaviour
     private async Task StartCor()
     {
         //Грузим джейсон с сервака
-        _serializeJson.LoadJsonFile();
-        //await _loadJsonClass.PostZapros(); //Должны получить стрингу
+        if (IsLoadWeb)
+        {
+            await _loadJsonClass.PostZapros(); //Должны получить стрингу
+        }
+        else
+        {
+            _serializeJson.LoadJsonFile(); //Загружает с ресурсов
+        }
+        
         //Делаем класс джесона
         if (JsonText != "")
             Json = JsonUtility.FromJson<JsonClass>(JsonText);
@@ -107,15 +121,14 @@ public class GameManager : MonoBehaviour
                 Json = JsonUtility.FromJson<JsonClass>(JsonText);
             } 
         }
-        Debug.Log("111");
-        CreateListFreeSoldRoom(); //Убирает из основного джесона проданные квартиры
-        Debug.Log("222");
-        CreateListRooms();
-        Debug.Log("333");
         CreateMySection();
-        Debug.Log("444");
-        
-        
+        //Debug.Log("111");
+        //CreateListFreeSoldRoom(); //Убирает из основного джесона проданные квартиры
+        //Debug.Log("222");
+        CreateListRooms();
+        //Debug.Log("333");
+
+
         SendMessageToServer.Init(this);//Один
         UdpClient.Init(this);          //Один
         UbManager10.Init(this);
@@ -134,13 +147,18 @@ public class GameManager : MonoBehaviour
         foreach (var mySection in MySections)
         {
             //Debug.Log(mySection.NumberUB + " " + mySection.Number + " " + mySection.Section.realtyObjects.Length);
-            if (mySection.NumberUB == 10)
-            {
-                foreach (var realtyObject in mySection.Section.realtyObjects)
+           if(mySection.NumberUB!=10) continue;
+           if(mySection.Number!=3) continue;
+                foreach (var realtyObject in mySection.MyApartments)
                 {
+                   
+                   Debug.Log(mySection.NumberUB + " " + realtyObject.RealtyObject.floor);
+                    
+
                     //Debug.Log(realtyObject.amount);
                 }
-            }
+                Debug.Log(mySection.MyApartments.Count);
+            
         }
     }
     
@@ -234,32 +252,30 @@ public class GameManager : MonoBehaviour
 
     private void CreateListRooms()
     {
-        foreach (var building in Json.buildings)
+        foreach (var section in MySections)
         {
-            bool isTrueName = false;
-            foreach (var korpus in KorpusName)
+            //Debug.Log(section.Number + " " + section.NumberUB);
+            int count = 0;
+            foreach (var realtyObject in section.MyApartments)
             {
-                if (building.name == korpus) isTrueName = true;
+                if (realtyObject.RealtyObject.realtyobjecttypestatus == "Sold" ||
+                    realtyObject.RealtyObject.direction == "Commercial") continue;
+                if (realtyObject.RoomQuantity == 0) Studiya.Rooms.Add(realtyObject);
+                else if (realtyObject.RoomQuantity == 1) One.Rooms.Add(realtyObject);
+                else if (realtyObject.RoomQuantity == 2) Two.Rooms.Add(realtyObject);
+                else if (realtyObject.RoomQuantity == 3) Three.Rooms.Add(realtyObject);
+                else Four.Rooms.Add(realtyObject);
+                count++;
             }
-            if(!isTrueName) continue;
-            foreach (var section in building.sections)
-            {
-                foreach (var realtyObject in section.realtyObjects)
-                {
-                    if(realtyObject.realtyobjecttypestatus=="Sold" || realtyObject.direction=="Commercial") continue;
-                    if(realtyObject.roomQuantityName==0) Studiya.Rooms.Add(realtyObject);
-                    else if(realtyObject.roomQuantityName==1) One.Rooms.Add(realtyObject);
-                    else if(realtyObject.roomQuantityName==2) Two.Rooms.Add(realtyObject);
-                    else if(realtyObject.roomQuantityName==3) Three.Rooms.Add(realtyObject);
-                    else Four.Rooms.Add(realtyObject);
-                }
-            }
-            Studiya.EndData = building.deadline;
-            One.EndData = building.deadline;
-            Two.EndData = building.deadline;
-            Three.EndData = building.deadline;
-            Four.EndData = building.deadline;
+
+            Studiya.EndData = section.EndData;
+            One.EndData = section.EndData;
+            Two.EndData = section.EndData;
+            Three.EndData = section.EndData;
+            Four.EndData = section.EndData;
+            //Debug.Log(count);
         }
+
         Studiya.Init();
         One.Init();
         Two.Init();
@@ -418,6 +434,7 @@ public class GameManager : MonoBehaviour
     
     public string GetSplitPrice(string str)
     {
+        //Debug.Log(str);
         if (str.Length < 5) return "0";
         string price = str.Insert(str.Length-3, " ");
         price = price.Insert(price.Length - 7, " ");
@@ -427,47 +444,38 @@ public class GameManager : MonoBehaviour
 
     private void CreateListFreeSoldRoom()
     {
-        foreach (var building in Json.buildings)
+
+        foreach (var section in MySections)
         {
-            bool isTrueName = false;
-            foreach (var korpus in KorpusName)
+            foreach (var apartment in section.MyApartments)
             {
-                if (building.name == korpus) isTrueName = true;
-            }
-            if(!isTrueName) continue;
-            foreach (var section in building.sections)
-            {
-                foreach (var realtyObject in section.realtyObjects)
+                if (apartment.RealtyObject.direction == "Commercial") continue;
+                if (apartment.RealtyObject.realtyobjecttypestatus != "Sold")
                 {
-                    if (realtyObject.direction == "Commercial") continue;
-                    if (realtyObject.realtyobjecttypestatus != "Sold")
-                    {
-                        RealtyObjectsFree.Add(realtyObject);
-                    }
-                    else
-                    {
-                        RealtyObjectsSold.Add(realtyObject);
-                        //Debug.Log(realtyObject.number + " " + realtyObject.floor + " " + realtyObject.name);
-                    }
+                    RealtyObjectsFree.Add(apartment);
+                }
+                else
+                {
+                    RealtyObjectsSold.Add(apartment);
+                    //Debug.Log(realtyObject.number + " " + realtyObject.floor + " " + realtyObject.name);
                 }
             }
         }
 
-        Debug.Log("Free "+ RealtyObjectsFree.Count);
-        Debug.Log("Sold "+RealtyObjectsSold.Count);
+        Debug.Log("Free " + RealtyObjectsFree.Count);
+        Debug.Log("Sold " + RealtyObjectsSold.Count);
     }
 }
 
 [Serializable]
 public class ListRooms
 {
-    public List<RealtyObject> Rooms = new List<RealtyObject>();
+    public List<MyApartment> Rooms = new List<MyApartment>();
     public float PriceMin;
     public float PriceMax;
     public float PloshadMin;
     public float PloshadMax;
     public string EndData;
-
 
     public void Init()
     {
@@ -475,11 +483,11 @@ public class ListRooms
         PloshadMin = 10000000f;
         foreach (var room in Rooms)
         {
-            //if(room.amount==0) Debug.Log(room.buildingId + " "  + room.number + " " + room.name + " " + room.direction);
-            if (PriceMin > room.amount) PriceMin = room.amount;
-            if (PriceMax < room.amount) PriceMax = room.amount;
-            if (PloshadMin > room.area) PloshadMin = room.area;
-            if (PloshadMax < room.area) PloshadMax = room.area;
+            //if(room.Price==0) Debug.Log(room.SectionNumber + " "  + room.Number + " " + room.RealtyObject.direction);
+            if (PriceMin > room.Price) PriceMin = room.Price;
+            if (PriceMax < room.Price) PriceMax = room.Price;
+            if (PloshadMin > room.Area) PloshadMin = room.Area;
+            if (PloshadMax < room.Area) PloshadMax = room.Area;
         }
         //Debug.Log((int)PriceMin + " " + (int)PriceMax + "//" + PloshadMin + " " + PloshadMax);
     }
@@ -489,13 +497,15 @@ public class ListRooms
 public class MySection
 {
     public int NumberUB;
+    public int Number;
     public Section Section;
+    public string BuildingName;
+    public List<MyApartment> MyApartments = new List<MyApartment>();
     public Dictionary<int, List<MyApartment>> ApartmentDictionary = new Dictionary<int, List<MyApartment>>();
     public Dictionary<int, float> MinPrice = new Dictionary<int, float>();
     public Dictionary<int, float> MaxPrice = new Dictionary<int, float>();
     public Dictionary<int, float> MinArea = new Dictionary<int, float>();
     public Dictionary<int, float> MaxArea = new Dictionary<int, float>();
-    public string Number;
 
     public string EndData;
 
@@ -504,7 +514,10 @@ public class MySection
     public MySection(Section section, string endData, string buildingName)
     {
         Section = section;
-        
+        BuildingName = buildingName;
+        Number = GetNumberKorpus(Section.name);
+        NumberUB = GetNumberUB(buildingName);
+        EndData = endData;
         _countRoomQuantity.Add(0);
         _countRoomQuantity.Add(1);
         _countRoomQuantity.Add(2);
@@ -518,8 +531,10 @@ public class MySection
         
         foreach (var realtyObject in Section.realtyObjects)
         {
-            if(realtyObject.realtyobjecttypestatus=="Sold" || realtyObject.direction=="Commercial") continue;
-            MyApartment apartment = new MyApartment(realtyObject);
+            if(realtyObject.realtyobjecttypestatus=="Sold" || realtyObject.direction=="Commercial" || realtyObject.realtyobjecttype=="Pantry") continue; // 
+            int numberFlat = GetNumberFlat(Section, realtyObject);
+            MyApartment apartment = new MyApartment(realtyObject, Number, NumberUB, numberFlat);
+            MyApartments.Add(apartment);
             if (apartment.RoomQuantity >= 4)
                 ApartmentDictionary[4].Add(apartment);
             else
@@ -536,10 +551,13 @@ public class MySection
                 MaxArea[roomQuantity] = MaxAreaApartment(roomQuantity);
             }
         }
+        //Debug.Log("Ub"+NumberUB + " " + Number);
+    }
+
+    private int GetNumberFlat(Section section, RealtyObject flat)
+    {
         
-        Number = GetNumberKorpus(Section.name);
-        NumberUB = GetNumberUB(buildingName);
-        EndData = endData;
+        return 0;
     }
 
     private float MinPriceApartment(int roomQuantity)
@@ -591,21 +609,11 @@ public class MySection
         return maxArea;
     }
     
-    private string GetNumberKorpus(string nameKorpus)
+    private int GetNumberKorpus(string nameKorpus)
     {
         string[] strings = nameKorpus.Split("-");
-        // Debug.Log("Number: " + strings[strings.Length - 1]);
-        // string[] split2 = strings[strings.Length - 1].Split(".");
-        // foreach (var s in split2)
-        // {
-        //     Debug.Log("Split: "+s);
-        // }
-        // if(split2.Length>1) return strings[split2.Length-1];
-        // else
-        // {
-        //   return strings[strings.Length-1];  
-        // }
-        return strings[strings.Length-1][strings[strings.Length-1].Length-1].ToString();
+        int n = int.Parse(strings[strings.Length - 1][strings[strings.Length - 1].Length - 1].ToString());
+        return n;
     }
 
     private int GetNumberUB(string nameUb)
@@ -620,20 +628,41 @@ public class MySection
 public class MyApartment
 {
     public RealtyObject RealtyObject;
+    public int Number;
     public float Area;
-    public float Price;
+    public int Price;
     public float PriceMeter;
     public int Floor;
     public int RoomQuantity;
+    public int SectionNumber;
+    public int NumberUB;
 
-    public MyApartment(RealtyObject realtyObject)
+    public MyApartment(RealtyObject realtyObject, int sectionNumber, int numberUb, int numberFlat)
     {
         RealtyObject = realtyObject;
+        if (numberUb == 9)
+            Number = int.Parse(realtyObject.number.ToString().Substring(3, realtyObject.number.ToString().Length - 3));
+        else
+        {
+            Number = numberFlat;
+        }
         Area = RealtyObject.area;
         Price = RealtyObject.amount;
         PriceMeter = RealtyObject.price;
         Floor = RealtyObject.floor;
         RoomQuantity = RealtyObject.roomQuantityName;
+        SectionNumber = sectionNumber;
+        NumberUB = numberUb;
+    }
+    
+    public string GetTypeRoom()
+    {
+        if (RoomQuantity == 0) return "Студия";
+        else if (RoomQuantity == 1) return "1-комнатная";
+        else if (RoomQuantity == 2) return "2-комнатная";
+        else if (RoomQuantity == 3) return "3-комнатная";
+        else if (RoomQuantity >= 4) return RoomQuantity + "-комнатная";
+        return RoomQuantity.ToString();
     }
 
 }

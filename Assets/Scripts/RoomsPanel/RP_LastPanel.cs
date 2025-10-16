@@ -26,7 +26,7 @@ public class RP_LastPanel : MonoBehaviour
     private Sprite roomSprite;
     private Sprite floorSprite;
     private UbManager _manager;
-    private RealtyObject _currentRealtyObject;
+    private MyApartment _myApartment;
     private Coroutine _coroutineLight;
     private bool _isOffAll;
 
@@ -52,28 +52,38 @@ public class RP_LastPanel : MonoBehaviour
         _manager.gameManager.SendMessageToServer.OffAll();
     }
 
-    public void OnOpenLastPanel(RealtyObject realtyObject)
+    public void OnOpenLastPanel(MyApartment realtyObject)
     {
         gameObject.SetActive(true);
 
-        roomSprite = Resources.Load<Sprite>("PlansRoom/" + realtyObject.realtyobjectId);
-        floorSprite = Resources.Load<Sprite>("PlansFloor/" + realtyObject.realtyobjectId);
+        if(realtyObject.NumberUB==9)
+        {
+            roomSprite = Resources.Load<Sprite>("PlansRoom/" + realtyObject.RealtyObject.realtyobjectId);
+            floorSprite = Resources.Load<Sprite>("PlansFloor/" + realtyObject.RealtyObject.realtyobjectId);
+        }
+        else
+        {
+            roomSprite = Resources.Load<Sprite>("PlansRoom10/" + realtyObject.RealtyObject.realtyobjectId);
+            floorSprite = Resources.Load<Sprite>("PlansFloor10/" + realtyObject.RealtyObject.realtyobjectId);
+        }
+        
         OnPlaner();
-        NameRoom.text = realtyObject.GetTypeRoom() + ", " + realtyObject.area + " <sprite index=1>";
-        Price.text = _manager.gameManager.GetSplitPrice(realtyObject.amount.ToString()) + " <sprite index=0>";
-        Korpus.text = _manager.gameManager.GetMarketingName(realtyObject.buildingId);
-        Otdelka.text = realtyObject.decorationName;
-        NumberFloor.text = realtyObject.floor.ToString();
-        RoomNumber.text = "№" + realtyObject.number;
+        NameRoom.text = realtyObject.GetTypeRoom() + ", " + realtyObject.Area + " <sprite index=1>";
+        Price.text = _manager.gameManager.GetSplitPrice(realtyObject.Price.ToString()) + " <sprite index=0>";
+        Korpus.text = _manager.gameManager.GetMarketingName(realtyObject.RealtyObject.buildingId);
+        if (realtyObject.RealtyObject.decorationName == "WithoutDecoration") Otdelka.text = "Без отделки";
+        else Otdelka.text = realtyObject.RealtyObject.decorationName;
+        NumberFloor.text = realtyObject.Floor.ToString();
+        RoomNumber.text = "№" + realtyObject.Number + " " + realtyObject.RealtyObject.number;
 
-        _currentRealtyObject = realtyObject;
+        _myApartment = realtyObject;
         
         //Подсветка
 
         OnLight(realtyObject);
     }
 
-    private void OnLight(RealtyObject realtyObject)
+    private void OnLight(MyApartment realtyObject)
     {
         _manager.gameManager.UdpClient.ClearQueue();
         _manager.gameManager.SendMessageToServer.OffAll();
@@ -84,8 +94,8 @@ public class RP_LastPanel : MonoBehaviour
     {
         gameObject.SetActive(false);
         _manager.gameManager.SendMessageToServer.OffAll();
-        if(_currentRealtyObject!=null && !_isOffAll)
-            _manager.gameManager.SendMessageToServer.OnFloor(_currentRealtyObject);
+        if(_myApartment!=null && !_isOffAll)
+            _manager.gameManager.SendMessageToServer.OnFloor(_myApartment);
     }
 
     private void OnPlaner()

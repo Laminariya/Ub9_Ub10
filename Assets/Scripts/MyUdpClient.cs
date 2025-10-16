@@ -60,7 +60,7 @@ public class MyUdpClient : MonoBehaviour
         }
         
         _ip = PlayerPrefs.GetString(_key);
-        Debug.Log(_ip);
+        //Debug.Log(_ip);
         //if (udpClient.Client!=null && udpClient.Client.Connected)
         //{
         //    udpClient.Dispose();

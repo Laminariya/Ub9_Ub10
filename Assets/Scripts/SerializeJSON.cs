@@ -152,16 +152,6 @@ public class RealtyObject
     public string saleTermsDateTo;
     public string websiteLink;
     public string layoutType;
-
-    public string GetTypeRoom()
-    {
-        if (roomQuantityName == 0) return "Студия";
-        else if (roomQuantityName == 1) return "1-комнатная";
-        else if (roomQuantityName == 2) return "2-комнатная";
-        else if (roomQuantityName == 3) return "3-комнатная";
-        else if (roomQuantityName >= 4) return roomQuantityName + "-комнатная";
-        return "Студия";
-    }
 }
 
 [Serializable]

@@ -8,7 +8,7 @@ public class SendMessageToServer : MonoBehaviour
 
     private GameManager _manager;
     private Coroutine _coroutine;
-    private RealtyObject _currentRoom;
+    private MyApartment _currentMyApartment;
     
     public void Init(GameManager manager)
     {
@@ -48,58 +48,58 @@ public class SendMessageToServer : MonoBehaviour
         Debug.Log(GetHexXXHH(300123));
     }
 
-    public void StartRoomOnFloor(RealtyObject realtyObject)
+    public void StartRoomOnFloor(MyApartment realtyObject)
     {
-        _currentRoom = realtyObject;
+        _currentMyApartment = realtyObject;
         
         OnRoom(realtyObject);
     }
     
-    public void OnFloor(RealtyObject realtyObject) //HH03SSXX01RRGGBB\r\n Включить бледным свечением этаж
+    public void OnFloor(MyApartment realtyObject) //HH03SSXX01RRGGBB\r\n Включить бледным свечением этаж
     {
         //HH03SSXX01080000
         
-        string str = realtyObject.sectionNumber.ToString("X");
+        string str = realtyObject.SectionNumber.ToString("X");
         if(str.Length==1) str = "0" + str;
         str += "03";
-        string f = realtyObject.floor.ToString("X");
+        string f = realtyObject.Floor.ToString("X");
         if (f.Length == 1) f = "0" + f;
         str += f;
         string s = 1.ToString("X");
         if (s.Length == 1) s = "0" + s;
         str += s + "03000000";
-        Debug.Log("Mess Floor: "+ realtyObject.sectionNumber + " // " + realtyObject.floor);
-        _manager.UdpClient.AddMessage(str, "Floor: " + realtyObject.sectionNumber + " // " + realtyObject.floor);
+        Debug.Log("Mess Floor: "+ realtyObject.SectionNumber + " // " + realtyObject.Floor);
+        _manager.UdpClient.AddMessage(str, "Floor: " + realtyObject.SectionNumber + " // " + realtyObject.Floor);
         return;
         
-        string message = GetHexXX(realtyObject.sectionNumber);
+        string message = GetHexXX(realtyObject.SectionNumber);
         message += "03";
-        message += GetHexXX(realtyObject.floor);
+        message += GetHexXX(realtyObject.Floor);
         message += "0103000000";
-        _manager.UdpClient.AddMessage(message, "OnFloor " + realtyObject.floor);
+        _manager.UdpClient.AddMessage(message, "OnFloor " + realtyObject.Floor);
     }
 
-    public void OnRoom(RealtyObject realtyObject) //HH01FFFF03000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
+    public void OnRoom(MyApartment realtyObject) //HH01FFFF03000000\r\n HH - номер дома, FFFF - номер квартиры (для выключения 03 меняем на 00)
     {
         //HH01FFFF03000000
-        string str = realtyObject.sectionNumber.ToString("X");
+        string str = realtyObject.SectionNumber.ToString("X");
         if(str.Length==1) str = "0" + str;
         str += "01";
-        string f = realtyObject.number.ToString("X");
+        string f = realtyObject.Number.ToString("X");
         if (f.Length == 1) f = "000" + f;
         else if (f.Length == 2) f = "00" + f;
         else if (f.Length == 3) f = "0" + f;
         f += "03000000";
         str += f;
-        Debug.Log("Mess Flat: "+ realtyObject.sectionNumber + " // " + realtyObject.number);
-        _manager.UdpClient.AddMessage(str, "Flat: " + realtyObject.sectionNumber + " // " + realtyObject.number);
+        //Debug.Log("Mess Flat: "+ realtyObject.sectionNumber + " // " + realtyObject.number);
+        _manager.UdpClient.AddMessage(str, "Flat: " + realtyObject.SectionNumber + " // " + realtyObject.Number);
         return;
         
-        string message = GetHexXX(realtyObject.sectionNumber);
+        string message = GetHexXX(realtyObject.SectionNumber);
         message += "01";
-        message += GetHexXXHH(realtyObject.number);
+        message += GetHexXXHH(realtyObject.Number);
         message += "03000000";
-        _manager.UdpClient.AddMessage(message, "OnRoom " + realtyObject.number);
+        _manager.UdpClient.AddMessage(message, "OnRoom " + realtyObject.Number);
     }
 
   

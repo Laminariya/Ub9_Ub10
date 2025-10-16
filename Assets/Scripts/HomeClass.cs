@@ -116,11 +116,11 @@ public class HomeClass : MonoBehaviour
     private Sprite _currentRender;
     private int[] _mass = new int[100]; //Этажи считаем от 1 элеманта, 
     private List<ButtonFloorPrefab> _buttonFloorPrefabs = new List<ButtonFloorPrefab>();
-    private RealtyObject _currentRealtyObject;
-    private RealtyObject _room_CurrentRoom;
+    private MyApartment _currentRealtyObject;
+    private MyApartment _room_CurrentRoom;
     private int _room_currentChoseRoom;
-    private List<RealtyObject> _realtyObjects = new List<RealtyObject>();
-    private RealtyObject _room_CurrentRealityObject;
+    private List<MyApartment> _myApartments = new List<MyApartment>();
+    private MyApartment _room_CurrentRealityObject;
 
     public void Init(UbManager manager)
     {
@@ -469,17 +469,17 @@ public class HomeClass : MonoBehaviour
             }
         }
 
-        _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number);
+        _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number.ToString());
         StartCoroutine(UpdateUI());
     }
 
     private void OnClickFloor(int numberFloor, MySection section)
     {
-        List<RealtyObject> realtyObjects = new List<RealtyObject>();
-        foreach (var realtyObject in section.Section.realtyObjects)
+        List<MyApartment> realtyObjects = new List<MyApartment>();
+        foreach (var realtyObject in section.MyApartments)
         {
-            //Debug.Log(realtyObject.floor+" " + numberFloor);
-            if(realtyObject.floor==numberFloor && realtyObject.realtyobjecttypestatus!="Sold") realtyObjects.Add(realtyObject);
+            if (realtyObject.Floor == numberFloor && realtyObject.RealtyObject.realtyobjecttypestatus != "Sold")
+                realtyObjects.Add(realtyObject);
         }
         Room_Activate(realtyObjects);
     }
@@ -506,16 +506,16 @@ public class HomeClass : MonoBehaviour
 
     #region Room
 
-    private void Room_Activate(List<RealtyObject> realtyObjects)
+    private void Room_Activate(List<MyApartment> realtyObjects)
     {
-        _realtyObjects.Clear();
-        _realtyObjects = new List<RealtyObject>(realtyObjects);
+        _myApartments.Clear();
+        _myApartments = new List<MyApartment>(realtyObjects);
         _room_currentChoseRoom = 0;
         RoomPanel.SetActive(true);
         Room_Dark.SetActive(false);
         Room_Popap.SetActive(false);
 
-        Room_NumberFloor.text = realtyObjects[0].floor+" этаж";
+        Room_NumberFloor.text = realtyObjects[0].Floor+" этаж";
         Room_CountRoom.text = realtyObjects.Count+" квартир";
         
         _manager.gameManager.SendMessageToServer.OffAll();
@@ -526,9 +526,9 @@ public class HomeClass : MonoBehaviour
 
     private void Room_ChangeRoom()
     {
-        _room_CurrentRoom = _realtyObjects[_room_currentChoseRoom];
-        Debug.Log(_room_CurrentRoom.number);
-        Sprite sprite = Resources.Load<Sprite>("PlansFloor/" + _room_CurrentRoom.realtyobjectId);
+        _room_CurrentRoom = _myApartments[_room_currentChoseRoom];
+        Debug.Log(_room_CurrentRoom.Number);
+        Sprite sprite = Resources.Load<Sprite>("PlansFloor/" + _room_CurrentRoom.RealtyObject.realtyobjectId);
         if (sprite.texture.width > sprite.texture.height)
         {
             Room_ImageHorizontal.gameObject.SetActive(true);
@@ -536,7 +536,7 @@ public class HomeClass : MonoBehaviour
             Room_ImageHorizontal.SetNativeSize();
             Room_ImageVertical.gameObject.SetActive(false);
             Room_Button_ChoseRoom.transform.parent = Room_ImageHorizontal.transform;
-            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
+            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.RealtyObject.realtyobjectId);
             vector2.x -= sprite.texture.width/2;
             vector2.y -= sprite.texture.height/2;
             float ws = 2470f / sprite.texture.width;
@@ -552,7 +552,7 @@ public class HomeClass : MonoBehaviour
             Room_ImageVertical.sprite = sprite;
             Room_ImageVertical.SetNativeSize();
             Room_Button_ChoseRoom.transform.parent = Room_ImageVertical.transform;
-            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.realtyobjectId);
+            Vector2 vector2 = _manager.gameManager.SearchRoomClass.GetVector(_room_CurrentRoom.RealtyObject.realtyobjectId);
             
             vector2.x -= sprite.texture.width/2;
             vector2.y -= sprite.texture.height/2;
@@ -565,12 +565,12 @@ public class HomeClass : MonoBehaviour
         
             
 
-        if(_room_CurrentRoom.roomQuantityName==0)
-            Room_Button_Text.text = "Студия, " + _room_CurrentRoom.area + " <sprite index=1>";
+        if(_room_CurrentRoom.RoomQuantity==0)
+            Room_Button_Text.text = "Студия, " + _room_CurrentRoom.Area + " <sprite index=1>";
         else
         {
             Room_Button_Text.text =
-                _room_CurrentRoom.roomQuantityName + "-комнатная, " + _room_CurrentRoom.area + " <sprite index=1>";
+                _room_CurrentRoom.RoomQuantity + "-комнатная, " + _room_CurrentRoom.Area + " <sprite index=1>";
         }
     }
 
@@ -579,7 +579,7 @@ public class HomeClass : MonoBehaviour
         RoomPanel.SetActive(false);
         _manager.gameManager.SendMessageToServer.OffAll();
         if(_room_CurrentRealityObject!=null)
-            _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number);
+            _manager.gameManager.SendMessageToServer.OnSection(_currentSection.Number.ToString());
     }
 
     private void Room_GoToMenu()
@@ -590,7 +590,7 @@ public class HomeClass : MonoBehaviour
     private void Room_OnUp()
     {
         _room_currentChoseRoom++;
-        if (_room_currentChoseRoom >= _realtyObjects.Count)
+        if (_room_currentChoseRoom >= _myApartments.Count)
             _room_currentChoseRoom = 0;
         Room_ChangeRoom();
     }
@@ -599,7 +599,7 @@ public class HomeClass : MonoBehaviour
     {
         _room_currentChoseRoom--;
         if (_room_currentChoseRoom < 0)
-            _room_currentChoseRoom = _realtyObjects.Count - 1;
+            _room_currentChoseRoom = _myApartments.Count - 1;
         Room_ChangeRoom();
     }
 
@@ -608,17 +608,17 @@ public class HomeClass : MonoBehaviour
         Room_Popap.SetActive(true);
         Room_Dark.SetActive(true);
         
-        Room_Price.text = _manager.gameManager.GetSplitPrice(_room_CurrentRoom.amount.ToString());
+        Room_Price.text = _manager.gameManager.GetSplitPrice(_room_CurrentRoom.Price.ToString());
         
-        if(_room_CurrentRoom.roomQuantityName==0)
-            Room_Area.text = "Студия, " + _room_CurrentRoom.area + " <sprite index=1>";
+        if(_room_CurrentRoom.RoomQuantity==0)
+            Room_Area.text = "Студия, " + _room_CurrentRoom.Area + " <sprite index=1>";
         else
         {
             Room_Area.text =
-                _room_CurrentRoom.roomQuantityName + "-комнатная, " + _room_CurrentRoom.area + " <sprite index=1>";
+                _room_CurrentRoom.RoomQuantity + "-комнатная, " + _room_CurrentRoom.Area + " <sprite index=1>";
         }
         
-        Room_EndData.text = _manager.gameManager.GetMySection(_room_CurrentRoom.sectionId).EndData;
+        Room_EndData.text = _manager.gameManager.GetMySection(_room_CurrentRoom.RealtyObject.sectionId).EndData;
     }
 
     private void Room_OnNext() //Переходим на последнюю страницу выбора квартир по параметрам

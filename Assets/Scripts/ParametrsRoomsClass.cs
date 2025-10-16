@@ -52,7 +52,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     public RP_LastPanel LastPanelClass;
 
     private TypeRoom _typeRoom;
-    private UbManager _gameManager;
+    private UbManager _ubManager;
     private float _deltaPrice;
     private float _deltaPloshad;
     private ListRooms _currentListRoom;
@@ -67,7 +67,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     
     public void Init(UbManager manager)
     {
-        _gameManager = manager;
+        _ubManager = manager;
         b_BackMenu.onClick.AddListener(OnBackMenu);
         b_Studio.onClick.AddListener(OnStudio);
         b_One.onClick.AddListener(OnOne);
@@ -106,7 +106,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         gameObject.SetActive(false);
         LastPanelClass.gameObject.SetActive(false);
-        _gameManager.gameManager.SendMessageToServer.OffAll();
+        _ubManager.gameManager.SendMessageToServer.OffAll();
     }
 
     private void OnBackMenu()
@@ -120,7 +120,7 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         OnStudio();
         OnKorpus1();
-        _gameManager.gameManager.SendMessageToServer.OffAll();
+        _ubManager.gameManager.SendMessageToServer.OffAll();
         for (int i = 0; i < _prefabs.Count; i++)
         {
             Destroy(_prefabs[i].gameObject);
@@ -143,19 +143,20 @@ public class ParametrsRoomsClass : MonoBehaviour
 
     IEnumerator UseCor()
     {
-        foreach (var room in _currentListRoom.Rooms)
+        foreach (var flat in _currentListRoom.Rooms)
         {
-            if (_gameManager.gameManager.GetUbName(room.buildingId) != NumberUb) continue;
-            Debug.Log(room.sectionNumber + " " + _currentKorpus);
-            if (room.sectionNumber != _currentKorpus) continue;
-            if (room.amount > _minPrice - 1 && room.amount < _maxPrice + 1)
+            //Debug.Log(_currentKorpus + " " + room.roomQuantityName + " " + room.sectionNumber + " "  + _ubManager.gameManager.GetUbName(room.buildingId));
+            if (flat.NumberUB != NumberUb) continue;
+            //Debug.Log(_currentKorpus + " " + room.roomQuantityName + " " + room.sectionNumber);
+            if (flat.SectionNumber != _currentKorpus) continue;
+            if (flat.Price > _minPrice - 1 && flat.Price < _maxPrice + 1)
             {
-                if (room.area > _minPloshad - 0.1f && room.area < _maxPloshad + 0.1f)
+                if (flat.Area > _minPloshad - 0.1f && flat.Area < _maxPloshad + 0.1f)
                 {
                     PlaneButtonPrefab obj = Instantiate(RoomPrefab, ContentParent).GetComponent<PlaneButtonPrefab>();
-                    obj.Init(room, _currentListRoom.EndData, _gameManager, this);
+                    obj.Init(flat, _currentListRoom.EndData, _ubManager, this);
                     _prefabs.Add(obj);
-                    _gameManager.gameManager.SendMessageToServer.OnRoom(room);
+                    _ubManager.gameManager.SendMessageToServer.OnRoom(flat);
                     //yield return new WaitForSeconds(0.1f);
                 }
             }
@@ -174,35 +175,35 @@ public class ParametrsRoomsClass : MonoBehaviour
     {
         _typeRoom = TypeRoom.Studio;
         ClickTypeRoom(b_Studio.image);
-        ActiveListRoom(_gameManager.gameManager.Studiya);
+        ActiveListRoom(_ubManager.gameManager.Studiya);
     }
 
     private void OnOne()
     {
         _typeRoom = TypeRoom.One;
         ClickTypeRoom(b_One.image);
-        ActiveListRoom(_gameManager.gameManager.One);
+        ActiveListRoom(_ubManager.gameManager.One);
     }
 
     private void OnTwo()
     {
         _typeRoom = TypeRoom.Two;
         ClickTypeRoom(b_Two.image);
-        ActiveListRoom(_gameManager.gameManager.Two);
+        ActiveListRoom(_ubManager.gameManager.Two);
     }
 
     private void OnThree()
     {
         _typeRoom = TypeRoom.Three;
         ClickTypeRoom(b_Three.image);
-        ActiveListRoom(_gameManager.gameManager.Three);
+        ActiveListRoom(_ubManager.gameManager.Three);
     }
 
     private void OnFour()
     {
         _typeRoom = TypeRoom.Four;
         ClickTypeRoom(b_Four.image);
-        ActiveListRoom(_gameManager.gameManager.Four);
+        ActiveListRoom(_ubManager.gameManager.Four);
     }
 
     private void OnKorpus1()
@@ -261,7 +262,7 @@ public class ParametrsRoomsClass : MonoBehaviour
                 
                 foreach (var prefab in apartaments)
                 {
-                    if (apartament.RealtyObject.amountDiscount > prefab.RealtyObject.amountDiscount)
+                    if (apartament.myApartment.RealtyObject.amountDiscount > prefab.myApartment.RealtyObject.amountDiscount)
                     {
                         apartament = prefab;
                     }
@@ -279,7 +280,7 @@ public class ParametrsRoomsClass : MonoBehaviour
                 
                 foreach (var prefab in apartaments)
                 {
-                    if (apartament.RealtyObject.amountDiscount < prefab.RealtyObject.amountDiscount)
+                    if (apartament.myApartment.RealtyObject.amountDiscount < prefab.myApartment.RealtyObject.amountDiscount)
                     {
                         apartament = prefab;
                     }
@@ -302,7 +303,7 @@ public class ParametrsRoomsClass : MonoBehaviour
                 
                 foreach (var prefab in apartaments)
                 {
-                    if (apartament.RealtyObject.area > prefab.RealtyObject.area)
+                    if (apartament.myApartment.Area > prefab.myApartment.Area)
                     {
                         apartament = prefab;
                     }
@@ -320,7 +321,7 @@ public class ParametrsRoomsClass : MonoBehaviour
                 
                 foreach (var prefab in apartaments)
                 {
-                    if (apartament.RealtyObject.area < prefab.RealtyObject.area)
+                    if (apartament.myApartment.Area < prefab.myApartment.Area)
                     {
                         apartament = prefab;
                     }
