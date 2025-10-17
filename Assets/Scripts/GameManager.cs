@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour
         {
             _serializeJson.LoadJsonFile(); //Загружает с ресурсов
         }
-        
+
         //Делаем класс джесона
         if (JsonText != "")
             Json = JsonUtility.FromJson<JsonClass>(JsonText);
@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetString("json", JsonText);
             Debug.Log("Save json");
         }
-        else  //Если нет, то берём из префсов, нет префсов, берём из текстового файла и кидаем в префсы
+        else //Если нет, то берём из префсов, нет префсов, берём из текстового файла и кидаем в префсы
         {
             if (PlayerPrefs.HasKey("json"))
             {
@@ -116,11 +116,13 @@ public class GameManager : MonoBehaviour
                 PlayerPrefs.SetString("json", JsonText);
                 Debug.Log("Load json txt file");
             }
+
             if (JsonText != "")
             {
                 Json = JsonUtility.FromJson<JsonClass>(JsonText);
-            } 
+            }
         }
+
         CreateMySection();
         //Debug.Log("111");
         //CreateListFreeSoldRoom(); //Убирает из основного джесона проданные квартиры
@@ -129,14 +131,14 @@ public class GameManager : MonoBehaviour
         //Debug.Log("333");
 
 
-        SendMessageToServer.Init(this);//Один
-        UdpClient.Init(this);          //Один
+        SendMessageToServer.Init(this); //Один
+        UdpClient.Init(this); //Один
         UbManager10.Init(this);
         UbManager9.Init(this);
-        CreateImagePng.Init(this);     //Один
+        CreateImagePng.Init(this); //Один
         SearchRoomClass.Init(this);
-        InputIpPanel.Init(this);       //Один
-        
+        InputIpPanel.Init(this); //Один
+
         OpenChoseComplex();
 
         //StartCoroutine(LoadAllPlane());
@@ -147,22 +149,48 @@ public class GameManager : MonoBehaviour
         foreach (var mySection in MySections)
         {
             //Debug.Log(mySection.NumberUB + " " + mySection.Number + " " + mySection.Section.realtyObjects.Length);
-           if(mySection.NumberUB!=10) continue;
-           if(mySection.Number!=3) continue;
-                foreach (var realtyObject in mySection.MyApartments)
-                {
-                   
-                   Debug.Log(mySection.NumberUB + " " + realtyObject.RealtyObject.floor);
-                    
-
-                    //Debug.Log(realtyObject.amount);
-                }
-                Debug.Log(mySection.MyApartments.Count);
-            
+            if (mySection.NumberUB != 10) continue;
+            foreach (var realtyObject in mySection.MyApartments)
+            {
+                realtyObject.Number = GetNumberFlat(mySection.Number, realtyObject.Floor, realtyObject.RealtyObject.numberOnFloor);
+                //Debug.Log(mySection.NumberUB + " " + realtyObject.RealtyObject.floor);
+                //Debug.Log(realtyObject.amount);
+            }
         }
     }
-    
-    
+
+    private int GetNumberFlat(int numberSection, int floor, int numberOnFloor)
+    {
+        List<int> floors = new List<int>();
+        if (numberSection == 1)
+        {
+            floors = new List<int>(Floors1);
+        }
+
+        if (numberSection == 2)
+        {
+            floors = new List<int>(Floors2);
+        }
+
+        if (numberSection == 3)
+        {
+            floors = new List<int>(Floors3);
+        }
+
+        if (numberSection == 5)
+        {
+            floors = new List<int>(Floors5);
+        }
+
+        int number = 0;
+        for (int i = 2; i < floor; i++)
+        {
+            number += floors[i];
+        }
+        number += numberOnFloor;
+
+        return number;
+    }
 
     private void CheckNewPlans()
     {
@@ -532,8 +560,8 @@ public class MySection
         foreach (var realtyObject in Section.realtyObjects)
         {
             if(realtyObject.realtyobjecttypestatus=="Sold" || realtyObject.direction=="Commercial" || realtyObject.realtyobjecttype=="Pantry") continue; // 
-            int numberFlat = GetNumberFlat(Section, realtyObject);
-            MyApartment apartment = new MyApartment(realtyObject, Number, NumberUB, numberFlat);
+            
+            MyApartment apartment = new MyApartment(realtyObject, Number, NumberUB);
             MyApartments.Add(apartment);
             if (apartment.RoomQuantity >= 4)
                 ApartmentDictionary[4].Add(apartment);
@@ -552,12 +580,6 @@ public class MySection
             }
         }
         //Debug.Log("Ub"+NumberUB + " " + Number);
-    }
-
-    private int GetNumberFlat(Section section, RealtyObject flat)
-    {
-        
-        return 0;
     }
 
     private float MinPriceApartment(int roomQuantity)
@@ -637,15 +659,11 @@ public class MyApartment
     public int SectionNumber;
     public int NumberUB;
 
-    public MyApartment(RealtyObject realtyObject, int sectionNumber, int numberUb, int numberFlat)
+    public MyApartment(RealtyObject realtyObject, int sectionNumber, int numberUb)
     {
         RealtyObject = realtyObject;
         if (numberUb == 9)
             Number = int.Parse(realtyObject.number.ToString().Substring(3, realtyObject.number.ToString().Length - 3));
-        else
-        {
-            Number = numberFlat;
-        }
         Area = RealtyObject.area;
         Price = RealtyObject.amount;
         PriceMeter = RealtyObject.price;
